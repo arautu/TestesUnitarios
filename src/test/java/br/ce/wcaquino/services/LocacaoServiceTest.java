@@ -16,13 +16,13 @@ public class LocacaoServiceTest {
         // cenario
         LocacaoService service = new LocacaoService();
         Usuario usuario = new Usuario("Usuario 1");
-        Filme filme = new Filme("Filme 1", 2, 4.0);
+        Filme filme = new Filme("Filme 1", 2, 5.0);
 
         // ação
         Locacao locacao = service.alugarFilme(usuario, filme);
 
         // verificação
-        Assert.assertTrue(locacao.getValor() == 4.0);
+        Assert.assertEquals(5.0,locacao.getValor(), 0.01);
         Assert.assertTrue(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()));
         Assert.assertTrue(DataUtils.isMesmaData(locacao.getDataRetorno(),
                 DataUtils.obterDataComDiferencaDias(1)));
