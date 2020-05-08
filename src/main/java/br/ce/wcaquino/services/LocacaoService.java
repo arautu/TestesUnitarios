@@ -5,45 +5,52 @@ import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
-import br.ce.wcaquino.utils.DataUtils;
-import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Date;
+import java.util.List;
 
 import static br.ce.wcaquino.utils.DataUtils.adicionarDias;
 
 public class LocacaoService {
-	
-	public Locacao alugarFilme(Usuario usuario, Filme filme) throws
-			FilmeSemEstoqueException, LocadoraException {
 
-		if (usuario == null) {
-			throw new LocadoraException("Usuário vazio");
-		}
+    public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws
+            FilmeSemEstoqueException, LocadoraException {
 
-		if (filme == null) {
-			throw new LocadoraException("Filme vazio");
-		}
+        if (usuario == null) {
+            throw new LocadoraException("Usuário vazio");
+        }
 
-		if (filme.getEstoque() == 0) {
-			throw new FilmeSemEstoqueException();
-		}
+        if (filmes.isEmpty()) {
+            throw new LocadoraException("Filme vazio");
+        }
 
-		Locacao locacao = new Locacao();
-		locacao.setFilme(filme);
-		locacao.setUsuario(usuario);
-		locacao.setDataLocacao(new Date());
-		locacao.setValor(filme.getPrecoLocacao());
+        for (Filme filme : filmes) {
+            if (filme.getEstoque() == 0) {
+                throw new FilmeSemEstoqueException();
+            }
+        }
 
-		//Entrega no dia seguinte
-		Date dataEntrega = new Date();
-		dataEntrega = adicionarDias(dataEntrega, 1);
-		locacao.setDataRetorno(dataEntrega);
-		
-		//Salvando a locacao...
-		//TODO adicionar método para salvar
+        Locacao locacao = new Locacao();
+        locacao.setFilmes(filmes);
+        locacao.setUsuario(usuario);
+        locacao.setDataLocacao(new Date());
+        locacao.setValor(somaValor(filmes));
 
-		return locacao;
-	}
+        // Entrega no dia seguinte
+        Date dataEntrega = new Date();
+        dataEntrega = adicionarDias(dataEntrega, 1);
+        locacao.setDataRetorno(dataEntrega);
+
+        return locacao;
+    }
+
+    private Double somaValor(List<Filme> filmes) {
+
+        Double soma = 0.0;
+
+        for (Filme filme : filmes) {
+            soma += filme.getPrecoLocacao();
+        }
+        return soma;
+    }
 }
