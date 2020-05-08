@@ -3,7 +3,8 @@ package br.ce.wcaquino.services;
 import br.ce.wcaquino.entities.Filme;
 import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
-import org.hamcrest.CoreMatchers;
+import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
+import br.ce.wcaquino.exceptions.LocadoraException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import static br.ce.wcaquino.utils.DataUtils.obterDataComDiferencaDias;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
 public class LocacaoServiceTest {
 
@@ -39,7 +41,7 @@ public class LocacaoServiceTest {
                 is(true));
     }
 
-    @Test(expected = Exception.class)
+    @Test(expected = FilmeSemEstoqueException.class)
     public void testLocacao_filmeSemEstoque() throws Exception {
         // cenario
         LocacaoService service = new LocacaoService();
@@ -51,32 +53,33 @@ public class LocacaoServiceTest {
     }
 
     @Test
-    public void testLocacao_filmeSemEstoque_2() {
+    public void testLocacao_usuarioVazio() throws FilmeSemEstoqueException {
         // cenario
         LocacaoService service = new LocacaoService();
-        Usuario usuario = new Usuario("Usuario 1");
         Filme filme = new Filme("Filme 1", 0, 5.0);
 
         // ação
         try {
-            service.alugarFilme(usuario, filme);
-            Assert.fail("Deveria ter lançado uma exceção");
-
-        } catch (Exception e) {
-            assertThat(e.getMessage(), CoreMatchers.is("Filme sem estoque"));
+            service.alugarFilme(null, filme);
+            fail("Esperado que não houvesse usuário");
+        } catch (LocadoraException e) {
+            assertThat(e.getMessage(), is("Usuário vazio"));
         }
+
+        System.out.println("Forma robusta");
     }
 
     @Test
-    public void testLocacao_filmeSemEstoque_3() {
+    public void testLocacao_FilmeVazio() {
         // cenario
         LocacaoService service = new LocacaoService();
         Usuario usuario = new Usuario("Usuario 1");
-        Filme filme = new Filme("Filme 1", 0, 5.0);
 
         // ação
-        Assert.assertThrows("Deveria ter lançado uma exceção", Exception.class, () -> {
-           service.alugarFilme(usuario, filme);
-        });
+        assertThrows("Não deveria haver filme ou outra exceção ocorreu",
+                LocadoraException.class, () -> { service.alugarFilme(usuario, null); }
+        );
+
+        System.out.println("Forma nova");
     }
 }
