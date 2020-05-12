@@ -5,26 +5,19 @@ import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
+import br.ce.wcaquino.utils.DataUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static br.ce.wcaquino.utils.DataUtils.isMesmaData;
 import static br.ce.wcaquino.utils.DataUtils.obterDataComDiferencaDias;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
@@ -185,6 +178,24 @@ public class LocacaoServiceTest {
 
         // Verificação
         assertThat(resultado.getValor(), is(14.0));
+    }
+
+    @Test
+    public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
+
+        // Cenário
+        Usuario usuario = new Usuario("Usuario 1");
+        List<Filme> filmes = Arrays.asList(
+                new Filme("Filme 1", 1, 5.0)
+                        );
+
+        // Ação
+        Locacao retorno = service.alugarFilme(usuario, filmes);
+
+        // Verificação
+        boolean ehSegunda = DataUtils.verificarDiaSemana(retorno.getDataRetorno(),
+                Calendar.MONDAY);
+        Assert.assertTrue(ehSegunda);
     }
 
 }
