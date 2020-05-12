@@ -35,34 +35,20 @@ public class LocacaoService {
         locacao.setUsuario(usuario);
         locacao.setDataLocacao(new Date());
 
-        // Aplica descontos
-        switch (filmes.size()) {
-            default:
-            case 6:
-                Double valorComDesconto = aplicaDesconto(
-                        filmes.get(5).getPrecoLocacao(),
-                        100.0);
-                filmes.get(5).setPrecoLocacao(valorComDesconto);
-            case 5:
-                valorComDesconto = aplicaDesconto(
-                        filmes.get(4).getPrecoLocacao(),
-                        75.0);
-                filmes.get(4).setPrecoLocacao(valorComDesconto);
-            case 4:
-                valorComDesconto = aplicaDesconto(
-                        filmes.get(3).getPrecoLocacao(),
-                        50.0);
-                filmes.get(3).setPrecoLocacao(valorComDesconto);
-            case 3:
-                valorComDesconto = aplicaDesconto(
-                        filmes.get(2).getPrecoLocacao(),
-                        25.0);
-                filmes.get(2).setPrecoLocacao(valorComDesconto);
-            case 2:
-            case 1:
-            case 0:
+        Double valorTotal = 0d;
+        for (int i = 0; i < filmes.size(); i++) {
+            Filme filme = filmes.get(i);
+            Double valorFilme = filme.getPrecoLocacao();
+
+            switch (i) {
+                case 2: valorFilme *= 0.75; break;
+                case 3: valorFilme *= 0.50; break;
+                case 4: valorFilme *= 0.25; break;
+                case 5: valorFilme = 0d; break;
+            }
+            valorTotal += valorFilme;
         }
-        locacao.setValor(somaValor(filmes));
+        locacao.setValor(valorTotal);
 
         // Entrega no dia seguinte
         Date dataEntrega = new Date();
@@ -71,20 +57,4 @@ public class LocacaoService {
 
         return locacao;
     }
-
-    private Double somaValor(List<Filme> filmes) {
-
-        Double soma = 0.0;
-
-        for (Filme filme : filmes) {
-            soma += filme.getPrecoLocacao();
-        }
-        return soma;
-    }
-
-    private Double aplicaDesconto(Double precoItem, Double descontoPorCento) {
-        return precoItem * (1 - descontoPorCento / 100);
-    }
-
-
 }
