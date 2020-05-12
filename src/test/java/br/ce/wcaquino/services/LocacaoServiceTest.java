@@ -6,10 +6,7 @@ import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ErrorCollector;
 
 import java.util.*;
@@ -22,7 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
-@SuppressWarnings("unused")
 public class LocacaoServiceTest {
 
     private LocacaoService service;
@@ -38,6 +34,9 @@ public class LocacaoServiceTest {
     @SuppressWarnings("unused")
     @Test
     public void deveAlugarFilme() throws Exception {
+
+        Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+
         // cenario
         Usuario usuario = new Usuario("Usuario 1");
 
@@ -183,6 +182,8 @@ public class LocacaoServiceTest {
     @Test
     public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
 
+        Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+
         // Cenário
         Usuario usuario = new Usuario("Usuario 1");
         List<Filme> filmes = Arrays.asList(
@@ -197,5 +198,4 @@ public class LocacaoServiceTest {
                 Calendar.MONDAY);
         Assert.assertTrue(ehSegunda);
     }
-
 }
