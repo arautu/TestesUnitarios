@@ -34,6 +34,34 @@ public class LocacaoService {
         locacao.setFilmes(filmes);
         locacao.setUsuario(usuario);
         locacao.setDataLocacao(new Date());
+
+        // Aplica descontos
+        switch (filmes.size()) {
+            default:
+            case 6:
+                Double valorComDesconto = aplicaDesconto(
+                        filmes.get(5).getPrecoLocacao(),
+                        100.0);
+                filmes.get(5).setPrecoLocacao(valorComDesconto);
+            case 5:
+                valorComDesconto = aplicaDesconto(
+                        filmes.get(4).getPrecoLocacao(),
+                        75.0);
+                filmes.get(4).setPrecoLocacao(valorComDesconto);
+            case 4:
+                valorComDesconto = aplicaDesconto(
+                        filmes.get(3).getPrecoLocacao(),
+                        50.0);
+                filmes.get(3).setPrecoLocacao(valorComDesconto);
+            case 3:
+                valorComDesconto = aplicaDesconto(
+                        filmes.get(2).getPrecoLocacao(),
+                        25.0);
+                filmes.get(2).setPrecoLocacao(valorComDesconto);
+            case 2:
+            case 1:
+            case 0:
+        }
         locacao.setValor(somaValor(filmes));
 
         // Entrega no dia seguinte
@@ -53,4 +81,10 @@ public class LocacaoService {
         }
         return soma;
     }
+
+    private Double aplicaDesconto(Double precoItem, Double descontoPorCento) {
+        return precoItem * (1 - descontoPorCento / 100);
+    }
+
+
 }

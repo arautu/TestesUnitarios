@@ -7,7 +7,6 @@ public class Locacao {
 
     private Usuario usuario;
     private List<Filme> filmes;
-    private Filme filme;
     private Date dataLocacao;
     private Date dataRetorno;
     private Double valor;
