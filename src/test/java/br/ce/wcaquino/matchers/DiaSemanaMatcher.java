@@ -28,6 +28,7 @@ public class DiaSemanaMatcher extends TypeSafeMatcher<Date> {
 
     @Override
     protected boolean matchesSafely(Date data) {
+
         return DataUtils.verificarDiaSemana(data, diaSemana);
     }
 }
