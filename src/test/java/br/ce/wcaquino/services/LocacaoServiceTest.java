@@ -14,6 +14,8 @@ import org.junit.rules.ErrorCollector;
 
 import java.util.*;
 
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
+import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
 import static br.ce.wcaquino.matchers.MatchersProprios.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -39,18 +41,17 @@ public class LocacaoServiceTest {
         Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
         // cenario
-        Usuario usuario = new Usuario("Usuario 1");
+        Usuario usuario = umUsuario().agora();
 
         List<Filme> filmes = new ArrayList<>();
 
-        filmes.add(new Filme("Filme 1", 2, 5.0));
-        filmes.add(new Filme("Filme 2", 3, 5.5));
+        filmes.add(umFilme().comValor(5.0).agora());
 
         // ação
         Locacao locacao = service.alugarFilme(usuario, filmes);
 
         // verificação
-        error.checkThat(locacao.getValor(), is(equalTo(10.5)));
+        error.checkThat(locacao.getValor(), is(equalTo(5.0)));
         error.checkThat(locacao.getDataLocacao(), ehHoje());
         error.checkThat(locacao.getDataRetorno(), ehHojeComDiferencaDias(1));
     }
@@ -58,12 +59,10 @@ public class LocacaoServiceTest {
     @Test(expected = FilmeSemEstoqueException.class)
     public void naoDeveAlugarFilmeSemEstoque() throws Exception {
         // cenario
-        Usuario usuario = new Usuario("Usuario 1");
+        Usuario usuario = umUsuario().agora();
         List<Filme> filmes = new ArrayList<>();
 
-        filmes.add(new Filme("Filme 1", 2, 5.0));
-        filmes.add(new Filme("Filme 2", 3, 5.5));
-        filmes.add(new Filme("Filme 3", 0, 1.25));
+        filmes.add(umFilme().semEstoque().agora());
 
         // ação
         service.alugarFilme(usuario, filmes);
@@ -74,9 +73,9 @@ public class LocacaoServiceTest {
         // cenario
         List<Filme> filmes = new ArrayList<>();
 
-        filmes.add(new Filme("Filme 1", 2, 5.0));
-        filmes.add(new Filme("Filme 2", 3, 5.5));
-        filmes.add(new Filme("Filme 3", 1, 1.25));
+        filmes.add(umFilme().agora());
+        filmes.add(umFilme().agora());
+        filmes.add(umFilme().agora());
 
         // ação
         try {
@@ -91,7 +90,7 @@ public class LocacaoServiceTest {
     @Test
     public void naoDeveAlugarFilmeSemFilme() {
         // cenario
-        Usuario usuario = new Usuario("Usuario 1");
+        Usuario usuario = umUsuario().agora();
         List<Filme> filmes = new ArrayList<>();
 
         // ação e Verificação
@@ -107,7 +106,7 @@ public class LocacaoServiceTest {
         Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
         // Cenário
-        Usuario usuario = new Usuario("Usuario 1");
+        Usuario usuario = umUsuario().agora();
         List<Filme> filmes = Arrays.asList(
                 new Filme("Filme 1", 1, 5.0)
         );
