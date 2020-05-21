@@ -1,5 +1,6 @@
 package br.ce.wcaquino.services;
 
+import br.ce.wcaquino.daos.LocacaoDAO;
 import br.ce.wcaquino.entities.Filme;
 import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
@@ -14,6 +15,8 @@ import java.util.List;
 import static br.ce.wcaquino.utils.DataUtils.adicionarDias;
 
 public class LocacaoService {
+
+    private LocacaoDAO dao;
 
     public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws
             FilmeSemEstoqueException, LocadoraException {
@@ -43,10 +46,18 @@ public class LocacaoService {
             Double valorFilme = filme.getPrecoLocacao();
 
             switch (i) {
-                case 2: valorFilme *= 0.75; break;
-                case 3: valorFilme *= 0.50; break;
-                case 4: valorFilme *= 0.25; break;
-                case 5: valorFilme = 0d; break;
+                case 2:
+                    valorFilme *= 0.75;
+                    break;
+                case 3:
+                    valorFilme *= 0.50;
+                    break;
+                case 4:
+                    valorFilme *= 0.25;
+                    break;
+                case 5:
+                    valorFilme = 0d;
+                    break;
             }
             valorTotal += valorFilme;
         }
@@ -60,6 +71,14 @@ public class LocacaoService {
         }
         locacao.setDataRetorno(dataEntrega);
 
+        // Salvando a locação...
+        dao.salvar(locacao);
+
         return locacao;
+    }
+
+    public void setLocacaoDAO(LocacaoDAO dao) {
+
+        this.dao = dao;
     }
 }

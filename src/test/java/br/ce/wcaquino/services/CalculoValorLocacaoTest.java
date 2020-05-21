@@ -1,6 +1,7 @@
 package br.ce.wcaquino.services;
 
-import br.ce.wcaquino.builders.FilmeBuilder;
+import br.ce.wcaquino.daos.LocacaoDAO;
+import br.ce.wcaquino.daos.LocacaoDAOFake;
 import br.ce.wcaquino.entities.Filme;
 import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static br.ce.wcaquino.builders.FilmeBuilder.*;
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -59,6 +60,8 @@ public class CalculoValorLocacaoTest {
     @Before
     public void setup() {
         service = new LocacaoService();
+        LocacaoDAO dao = new LocacaoDAOFake();
+        service.setLocacaoDAO(dao);
     }
 
     @Test

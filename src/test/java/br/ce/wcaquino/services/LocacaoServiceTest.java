@@ -1,12 +1,13 @@
 package br.ce.wcaquino.services;
 
+import br.ce.wcaquino.daos.LocacaoDAO;
+import br.ce.wcaquino.daos.LocacaoDAOFake;
 import br.ce.wcaquino.entities.Filme;
 import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
-import buildermaster.BuilderMaster;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,6 +35,8 @@ public class LocacaoServiceTest {
     @Before
     public void setup() {
         service = new LocacaoService();
+        LocacaoDAO dao = new LocacaoDAOFake();
+        service.setLocacaoDAO(dao);
     }
 
     @Test
