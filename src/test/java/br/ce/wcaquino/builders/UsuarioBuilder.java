@@ -16,8 +16,13 @@ public class UsuarioBuilder {
         return builder;
     }
 
-    public Usuario agora() {
+    public UsuarioBuilder comNome(String nome) {
 
+        usuario.setNome(nome);
+        return this;
+    }
+
+    public Usuario agora() {
         return usuario;
     }
 }

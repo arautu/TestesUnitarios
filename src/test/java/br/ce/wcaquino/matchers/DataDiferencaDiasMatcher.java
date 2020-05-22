@@ -10,7 +10,7 @@ import java.util.Locale;
 
 public class DataDiferencaDiasMatcher extends TypeSafeMatcher<Date> {
 
-    private Integer qtdDias;
+    private final Integer qtdDias;
 
     public DataDiferencaDiasMatcher(Integer qtdDias) {
         this.qtdDias = qtdDias;

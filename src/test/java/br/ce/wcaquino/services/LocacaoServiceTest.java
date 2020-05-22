@@ -1,17 +1,13 @@
 package br.ce.wcaquino.services;
 
 import br.ce.wcaquino.daos.LocacaoDAO;
-import br.ce.wcaquino.daos.LocacaoDAOFake;
 import br.ce.wcaquino.entities.Filme;
 import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.mockito.Mockito;
 
@@ -23,8 +19,10 @@ import static br.ce.wcaquino.matchers.MatchersProprios.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 public class LocacaoServiceTest {
 
@@ -32,12 +30,16 @@ public class LocacaoServiceTest {
     public final ErrorCollector error = new ErrorCollector();
 
     private LocacaoService service;
+    private LocacaoDAO dao;
+    private SPCService spc;
 
     @Before
     public void setup() {
         service = new LocacaoService();
-        LocacaoDAO dao = Mockito.mock(LocacaoDAO.class);
+        dao = mock(LocacaoDAO.class);
         service.setLocacaoDAO(dao);
+        spc = mock(SPCService.class);
+        service.setSpcService(spc);
     }
 
     @Test
@@ -106,20 +108,34 @@ public class LocacaoServiceTest {
     }
 
     @Test
-    public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
+    public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException,
+            LocadoraException {
 
         Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
         // Cenário
         Usuario usuario = umUsuario().agora();
-        List<Filme> filmes = Arrays.asList(
-                new Filme("Filme 1", 1, 5.0)
-        );
+        List<Filme> filmes = Arrays.asList(umFilme().agora());
 
         // Ação
         Locacao retorno = service.alugarFilme(usuario, filmes);
 
         // Verificação
         assertThat(retorno.getDataRetorno(), caiNumaSegunda());
+    }
+
+    @Test
+    public void naoDeveAlugarFilmeParaNegativadoSPC() {
+
+        // Cenário
+        Usuario usuario = umUsuario().agora();
+        Usuario usuario2 = umUsuario().comNome("Usuario 2").agora();
+        List<Filme> filmes = Arrays.asList(umFilme().agora());
+
+        when(spc.possuiNegativacao(usuario)).thenReturn(true);
+
+        // Ação e verificação
+        assertThrows("Usuário negativado", LocadoraException.class,
+                () -> service.alugarFilme(usuario, filmes));
     }
 }
