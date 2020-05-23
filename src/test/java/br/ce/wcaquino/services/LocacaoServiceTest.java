@@ -6,20 +6,24 @@ import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
-import br.ce.wcaquino.utils.DataUtils;
-import org.junit.*;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.mockito.Mockito;
 
 import java.util.*;
 
 import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
+import static br.ce.wcaquino.builders.LocacaoBuilder.umLocacao;
 import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
 import static br.ce.wcaquino.matchers.MatchersProprios.*;
+import static br.ce.wcaquino.utils.DataUtils.obterDataComDiferencaDias;
+import static br.ce.wcaquino.utils.DataUtils.verificarDiaSemana;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -32,6 +36,7 @@ public class LocacaoServiceTest {
     private LocacaoService service;
     private LocacaoDAO dao;
     private SPCService spc;
+    private EmailService email;
 
     @Before
     public void setup() {
@@ -40,12 +45,14 @@ public class LocacaoServiceTest {
         service.setLocacaoDAO(dao);
         spc = mock(SPCService.class);
         service.setSpcService(spc);
+        email = mock(EmailService.class);
+        service.setEmailService(email);
     }
 
     @Test
     public void deveAlugarFilme() throws Exception {
 
-        Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+        Assume.assumeFalse(verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
         // cenario
         Usuario usuario = umUsuario().agora();
@@ -111,7 +118,7 @@ public class LocacaoServiceTest {
     public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException,
             LocadoraException {
 
-        Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+        Assume.assumeTrue(verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
         // Cenário
         Usuario usuario = umUsuario().agora();
@@ -129,7 +136,6 @@ public class LocacaoServiceTest {
 
         // Cenário
         Usuario usuario = umUsuario().agora();
-        Usuario usuario2 = umUsuario().comNome("Usuario 2").agora();
         List<Filme> filmes = Arrays.asList(umFilme().agora());
 
         when(spc.possuiNegativacao(usuario)).thenReturn(true);
@@ -137,5 +143,26 @@ public class LocacaoServiceTest {
         // Ação e verificação
         assertThrows("Usuário negativado", LocadoraException.class,
                 () -> service.alugarFilme(usuario, filmes));
+
+        Mockito.verify(spc).possuiNegativacao(usuario);
+    }
+
+    @Test
+    public void deveEnviarEmailParaLocacoesAtrasadas() {
+
+        // Cenário
+        Usuario usuario = umUsuario().agora();
+        List<Locacao> locacoes = Arrays.asList(
+                umLocacao()
+                        .comUsuario(usuario)
+                        .comDataRetorno(obterDataComDiferencaDias(-2))
+                        .agora());
+        when(dao.obterLocacoesPendentes()).thenReturn(locacoes);
+
+        // Ação
+        service.notificarAtrasos();
+
+        // Verificação
+        verify(email).notificarAtraso(usuario);
     }
 }
