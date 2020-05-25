@@ -11,7 +11,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
@@ -27,25 +30,23 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
+
 public class LocacaoServiceTest {
 
     @Rule
     public final ErrorCollector error = new ErrorCollector();
-
+    @InjectMocks
     private LocacaoService service;
+    @Mock
     private LocacaoDAO dao;
+    @Mock
     private SPCService spc;
+    @Mock
     private EmailService email;
 
     @Before
     public void setup() {
-        service = new LocacaoService();
-        dao = mock(LocacaoDAO.class);
-        service.setLocacaoDAO(dao);
-        spc = mock(SPCService.class);
-        service.setSpcService(spc);
-        email = mock(EmailService.class);
-        service.setEmailService(email);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
