@@ -4,9 +4,9 @@ import br.ce.wcaquino.utils.DataUtils;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 public class DataDiferencaDiasMatcher extends TypeSafeMatcher<Date> {
 
@@ -18,18 +18,14 @@ public class DataDiferencaDiasMatcher extends TypeSafeMatcher<Date> {
 
     @Override
     protected boolean matchesSafely(Date data) {
-
         return DataUtils.isMesmaData(data, DataUtils.obterDataComDiferencaDias(qtdDias));
     }
 
     @Override
     public void describeTo(Description description) {
 
-        Date hoje = new Date();
-        Calendar data = Calendar.getInstance();
-        data.setTime(hoje);
-        data.add(Calendar.DATE, qtdDias);
-        String dataString = data.getDisplayName(Calendar.DAY_OF_WEEK , Calendar.LONG, Locale.US);
-        description.appendText(dataString);
+        Date dataEsperada = DataUtils.obterDataComDiferencaDias(qtdDias);
+        DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        description.appendText(format.format(dataEsperada));
     }
 }

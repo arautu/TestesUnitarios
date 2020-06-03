@@ -11,10 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.util.*;
 
@@ -189,5 +186,24 @@ public class LocacaoServiceTest {
                 () -> service.alugarFilme(usuario, filmes));
 
         assertThat(exception.getMessage(), is("Problemas com SPC, tente novamente"));
+    }
+
+    @Test
+    public void deveProrrogarUmaLocacao() {
+
+        // Cenário
+        Locacao locacao = umLocacao().agora();
+
+        // Ação
+        service.prorrogarLocacao(locacao, 3);
+
+        // Verificação
+        ArgumentCaptor<Locacao> argCapt = ArgumentCaptor.forClass(Locacao.class);
+        Mockito.verify(dao).salvar(argCapt.capture());
+        Locacao locacaoRetornada = argCapt.getValue();
+
+        error.checkThat(locacaoRetornada.getValor(), is(12.0));
+        error.checkThat(locacaoRetornada.getDataLocacao(), ehHoje());
+        error.checkThat(locacaoRetornada.getDataRetorno(), ehHojeComDiferencaDias(3));
     }
 }
