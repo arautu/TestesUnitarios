@@ -7,26 +7,21 @@ import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
-import javax.xml.crypto.Data;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
 import static br.ce.wcaquino.builders.LocacaoBuilder.umLocacao;
 import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
 import static br.ce.wcaquino.matchers.MatchersProprios.*;
-import static br.ce.wcaquino.utils.DataUtils.verificarDiaSemana;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,13 +29,12 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ LocacaoService.class })
 public class LocacaoServiceTest {
 
     @Rule
     public final ErrorCollector error = new ErrorCollector();
     @InjectMocks
+    @Spy
     private LocacaoService service;
     @Mock
     private LocacaoDAO dao;
@@ -52,7 +46,6 @@ public class LocacaoServiceTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        service = PowerMockito.spy(service);
     }
 
     @Test
@@ -62,21 +55,17 @@ public class LocacaoServiceTest {
         Usuario usuario = umUsuario().agora();
         List<Filme> filmes = new ArrayList<>();
         filmes.add(umFilme().comValor(5.0).agora());
-//        PowerMockito.whenNew(Date.class).withNoArguments().thenReturn(DataUtils.obterData(28, 4, 2017));
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2017, Calendar.APRIL, 28);
-        PowerMockito.mockStatic(Calendar.class);
-        PowerMockito.when(Calendar.getInstance()).thenReturn(calendar);
-
+        Mockito.doReturn(DataUtils.obterData(28, 4, 2017))
+                .when(service).obterData();
         // ação
         Locacao locacao = service.alugarFilme(usuario, filmes);
 
         // verificação
         error.checkThat(locacao.getValor(), is(equalTo(5.0)));
-//        error.checkThat(locacao.getDataLocacao(), ehHoje());
-//        error.checkThat(locacao.getDataRetorno(), ehHojeComDiferencaDias(1));
-        error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(), DataUtils.obterData(28, 4, 2017)), is(true));
-        error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterData(29, 4, 2017)), is(true));
+        error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(),
+                DataUtils.obterData(28, 4, 2017)), is(true));
+        error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(),
+                DataUtils.obterData(29, 4, 2017)), is(true));
     }
 
     @Test(expected = FilmeSemEstoqueException.class)
@@ -128,20 +117,13 @@ public class LocacaoServiceTest {
         // Cenário
         Usuario usuario = umUsuario().agora();
         List<Filme> filmes = Arrays.asList(umFilme().agora());
-//        PowerMockito.whenNew(Date.class).withNoArguments().thenReturn(DataUtils.obterData(29, 4, 2017));
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2017, Calendar.APRIL, 29);
-        PowerMockito.mockStatic(Calendar.class);
-        PowerMockito.when(Calendar.getInstance()).thenReturn(calendar);
-
+        Mockito.doReturn(DataUtils.obterData(29, 4, 2017))
+                .when(service).obterData();
         // Ação
         Locacao retorno = service.alugarFilme(usuario, filmes);
 
         // Verificação
         assertThat(retorno.getDataRetorno(), caiNumaSegunda());
-//        PowerMockito.verifyNew(Date.class, Mockito.times(2)).withNoArguments();
-        PowerMockito.verifyStatic(Calendar.class, Mockito.times(2));
-        Calendar.getInstance();
     }
 
     @Test
@@ -224,32 +206,17 @@ public class LocacaoServiceTest {
     }
 
     @Test
-    public void deveAlugarFilme_SemCalcularValor() throws Exception {
-
-        // Cenário
-        Usuario usuario = umUsuario().agora();
-        List<Filme> filmes = Arrays.asList(umFilme().agora());
-        PowerMockito.doReturn(1.0)
-                .when(service, "calcularValorLocacao", filmes);
-
-        // Ação
-        Locacao locacao = service.alugarFilme(usuario, filmes);
-
-        // Verificação
-        assertThat(locacao.getValor(), is(1.0));
-        PowerMockito.verifyPrivate(service)
-                .invoke("calcularValorLocacao", filmes);
-    }
-
-    @Test
     public void deveCalcularValorLocaocao() throws Exception {
 
         // Cenário
         List<Filme> filmes = Arrays.asList(umFilme().agora());
 
         // Ação
-        Double valor = Whitebox.invokeMethod(service,
-                "calcularValorLocacao", filmes);
+        Class<LocacaoService> clazz = LocacaoService.class;
+        Method metodo = clazz.getDeclaredMethod("calcularValorLocacao", List.class);
+        metodo.setAccessible(true);
+        Double valor = (Double) metodo.invoke(service, filmes);
+
         // Verificação
         assertThat(valor, is(4.0));
     }
