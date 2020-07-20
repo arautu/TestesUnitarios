@@ -6,13 +6,9 @@ import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
-import br.ce.wcaquino.runners.ParallelRunner;
 import br.ce.wcaquino.utils.DataUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
 import org.mockito.*;
 
 import java.lang.reflect.Method;
@@ -31,7 +27,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-@RunWith(ParallelRunner.class)
 public class LocacaoServiceTest {
 
     @Rule
@@ -48,7 +43,20 @@ public class LocacaoServiceTest {
 
     @Before
     public void setup() {
+
         MockitoAnnotations.initMocks(this);
+        System.out.println("Iniciando 2...");
+        CalculadoraTest.ordem.append("2");
+    }
+
+    @After
+    public void tearDown() {
+        System.out.println("finalizando 2...");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        System.out.println(CalculadoraTest.ordem.toString());
     }
 
     @Test

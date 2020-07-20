@@ -6,6 +6,8 @@ import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,15 +65,30 @@ public class CalculoValorLocacaoTest {
 
     @Before
     public void setup() {
+
         initMocks(this);
+        System.out.println("Iniciando 3...");
+        CalculadoraTest.ordem.append("3");
+
+    }
+
+    @After
+    public void tearDown() {
+        System.out.println("finalizando 3...");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        System.out.println(CalculadoraTest.ordem.toString());
     }
 
     @Test
     public void deveCalcularValorLocacaoConsiderandoDescontos()
-            throws FilmeSemEstoqueException, LocadoraException {
+            throws FilmeSemEstoqueException, LocadoraException, InterruptedException {
 
         // Cenário
         Usuario usuario = new Usuario("Usuario 1");
+        Thread.sleep(5000);
 
         // Açao
         Locacao resultado = service.alugarFilme(usuario, filmes);

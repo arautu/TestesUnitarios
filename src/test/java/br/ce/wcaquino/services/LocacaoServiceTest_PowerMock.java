@@ -5,9 +5,7 @@ import br.ce.wcaquino.entities.Filme;
 import br.ce.wcaquino.entities.Locacao;
 import br.ce.wcaquino.entities.Usuario;
 import br.ce.wcaquino.utils.DataUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -47,6 +45,18 @@ public class LocacaoServiceTest_PowerMock {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         service = PowerMockito.spy(service);
+        System.out.println("Iniciando 4...");
+        CalculadoraTest.ordem.append("4");
+    }
+
+    @After
+    public void tearDown() {
+        System.out.println("finalizando 4...");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        System.out.println(CalculadoraTest.ordem.toString());
     }
 
     @Test
