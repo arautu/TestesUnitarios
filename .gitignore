@@ -1,3 +1,7 @@
 *.class
 *.kotlin_module
 *.attach_*
+*.txt
+*.lst
+TEST-*.xml
+
